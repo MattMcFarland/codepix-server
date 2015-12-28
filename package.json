@@ -1,5 +1,5 @@
 {
-  "name": "mcfarland-codepix-server",
+  "name": "codepix-server",
   "version": "0.0.0",
   "scripts": {
     "prepublish": "npm test && npm run build",

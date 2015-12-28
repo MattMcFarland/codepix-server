@@ -447,5 +447,8 @@ db.test.sqlite
 
 raw*.json
 
+# bower
+bower_components
+
 # distribution
 lib
