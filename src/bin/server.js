@@ -1,25 +1,28 @@
-#!/usr/bin/env node
 
 /**
- * Module dependencies.
+ * Import Dependencies
  */
+import app from '../app';
+import http from 'http';
+import debug from 'debug';
 
-var app = require('../app');
-var debug = require('debug')('codepix:server');
-var http = require('http');
+/**
+ * Setup Debug
+ */
+debug('codepix:server');
 
 /**
  * Get port from environment and store in Express.
  */
 
-var port = normalizePort(process.env.PORT || '3000');
+let port = normalizePort(process.env.PORT || '3000');
 app.set('port', port);
 
 /**
  * Create HTTP server.
  */
 
-var server = http.createServer(app);
+const server = http.createServer(app);
 
 /**
  * Listen on provided port, on all network interfaces.
@@ -34,16 +37,16 @@ server.on('listening', onListening);
  */
 
 function normalizePort(val) {
-  var port = parseInt(val, 10);
+  var _port = parseInt(val, 10);
 
-  if (isNaN(port)) {
+  if (isNaN(_port)) {
     // named pipe
     return val;
   }
 
-  if (port >= 0) {
+  if (_port >= 0) {
     // port number
-    return port;
+    return _port;
   }
 
   return false;
