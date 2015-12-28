@@ -1,5 +1,5 @@
 {
-  "name": "@mattmcfarland/codepix-server",
+  "name": "mcfarland-codepix-server",
   "version": "0.0.0",
   "scripts": {
     "prepublish": "npm test && npm run build",
@@ -10,16 +10,15 @@
     "check": "flow check",
     "build": "rm -rf lib/* && babel src --ignore __tests__ --out-dir lib && npm run copy",
     "copy": "cp -R src/public lib/public",
-    "watch": "babel scripts/watch.js | node",
-    "watch:seed": "babel scripts/watch-seed.js | node",
+    "watch": "babel tasks/watch.js | node",
     "cover": "babel-node node_modules/.bin/isparta cover --root src --report html node_modules/.bin/_mocha -- $npm_package_options_mocha",
     "cover:lcov": "babel-node node_modules/.bin/isparta cover --root src --report lcovonly node_modules/.bin/_mocha -- $npm_package_options_mocha",
     "start": "node --harmony ./lib/bin/server.js",
     "deploy": "npm test && npm run build && pm2 deploy ecosystem.json production"
   },
   "options": {
-    "mocha": "--require scripts/mocha-bootload src/**/__tests__/**/*.js",
-    "seed": "--require scripts/mocha-bootload sequelize/**/__tests__/**/*.js"
+    "mocha": "--require tasks/mocha-bootload src/**/__tests__/**/*.js",
+    "seed": "--require tasks/mocha-bootload sequelize/**/__tests__/**/*.js"
   },
   "files": [
     "lib",
