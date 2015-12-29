@@ -9,7 +9,7 @@
   "verbose": false,
   "exec": "npm test && npm run build && npm run debug",
   "events": {
-    "restart": "osascript -e 'display notification \"App restarted due to:\n'$FILENAME'\" with title \"nodemon\"'"
+    "restart": "osascript -e 'display notification \"App restarted due to:\n'$FILENAME'\" with title \"codepix-server\"'"
   },
   "watch": [
     "src/**/*.js"

@@ -18,19 +18,21 @@ import {
 } from './routes';
 
 // app setup
-var app = express();
-
+const app = express();
+const staticpath = path.join(
+  __dirname, '../node_modules/codepix-client/lib/public'
+);
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
 
 // uncomment after placing your favicon in /public
-app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
+app.use(favicon(path.join(staticpath, 'favicon.ico')));
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(staticpath));
 
 app.use('/', root);
 
@@ -54,6 +56,7 @@ if (app.get('env') === 'development') {
     });
   });
 }
+
 
 // production error handler
 // no stack-traces leaked to user
