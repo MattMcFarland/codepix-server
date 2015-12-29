@@ -1,3 +1,19 @@
+'use strict';
+
+var _sane = require('sane');
+
+var _sane2 = _interopRequireDefault(_sane);
+
+var _path = require('path');
+
+var _child_process = require('child_process');
+
+var _flowBin = require('flow-bin');
+
+var _flowBin2 = _interopRequireDefault(_flowBin);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 /**
  *  Copyright (c) 2015, Facebook, Inc.
  *  All rights reserved.
@@ -31,20 +47,14 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import sane from 'sane';
-import { resolve as resolvePath } from 'path';
-import { spawn } from 'child_process';
-import flowBinPath from 'flow-bin';
-
-
 process.env.PATH += ':./node_modules/.bin';
 
-var cmd = resolvePath(__dirname);
-var srcDir = resolvePath(cmd, './src');
+var cmd = (0, _path.resolve)(__dirname);
+var srcDir = (0, _path.resolve)(cmd, './src');
 
 function exec(command, options) {
   return new Promise(function (resolve, reject) {
-    var child = spawn(command, options, {
+    var child = (0, _child_process.spawn)(command, options, {
       cmd: cmd,
       env: process.env,
       stdio: 'inherit'
@@ -59,16 +69,12 @@ function exec(command, options) {
   });
 }
 
-var flowServer = spawn(flowBinPath, ['server'], {
+var flowServer = (0, _child_process.spawn)(_flowBin2.default, ['server'], {
   cmd: cmd,
   env: process.env
 });
 
-var watcher = sane(srcDir, { glob: ['**/*.*'] })
-  .on('ready', startWatch)
-  .on('add', changeFile)
-  .on('delete', deleteFile)
-  .on('change', changeFile);
+var watcher = (0, _sane2.default)(srcDir, { glob: ['**/*.*'] }).on('ready', startWatch).on('add', changeFile).on('delete', deleteFile).on('change', changeFile);
 
 process.on('SIGINT', function () {
   watcher.close();
@@ -112,7 +118,7 @@ function guardedCheck() {
   var filepaths = Object.keys(toCheck);
   toCheck = {};
   needsCheck = false;
-  checkFiles(filepaths).then(() => {
+  checkFiles(filepaths).then(function () {
     isChecking = false;
     process.nextTick(guardedCheck);
   });
@@ -121,18 +127,19 @@ function guardedCheck() {
 function checkFiles(filepaths) {
   console.log('\u001b[2J');
 
-  return parseFiles(filepaths)
-    .then(() => runTests(filepaths))
-    .then(testSuccess => lintFiles(filepaths)
-      .then(lintSuccess => typecheckStatus()
-        .then(typecheckSuccess =>
-        testSuccess && lintSuccess && typecheckSuccess)))
-    .catch(() => false)
-    .then(success => {
-      process.stdout.write(
-        '\n' + (success ? '' : '\x07') + green(invert('watching...'))
-      );
+  return parseFiles(filepaths).then(function () {
+    return runTests(filepaths);
+  }).then(function (testSuccess) {
+    return lintFiles(filepaths).then(function (lintSuccess) {
+      return typecheckStatus().then(function (typecheckSuccess) {
+        return testSuccess && lintSuccess && typecheckSuccess;
+      });
     });
+  }).catch(function () {
+    return false;
+  }).then(function (success) {
+    process.stdout.write('\n' + (success ? '' : '\x07') + green(invert('watching...')));
+  });
 }
 
 // Checking steps
@@ -140,13 +147,9 @@ function checkFiles(filepaths) {
 function parseFiles(filepaths) {
   console.log('Checking Syntax');
 
-  return Promise.all(filepaths.map(filepath => {
+  return Promise.all(filepaths.map(function (filepath) {
     if (isJS(filepath) && !isTest(filepath)) {
-      return exec('babel', [
-        '--optional', 'runtime',
-        '--out-file', '/dev/null',
-        srcPath(filepath)
-      ]);
+      return exec('babel', ['--optional', 'runtime', '--out-file', '/dev/null', srcPath(filepath)]);
     }
   }));
 }
@@ -154,38 +157,38 @@ function parseFiles(filepaths) {
 function runTests(filepaths) {
   console.log('\nRunning Tests');
 
-  return exec('mocha', [
-    '--reporter', 'spec',
-    '--require', 'tasks/mocha-bootload'
-  ].concat(
-    allTests(filepaths) ? filepaths.map(srcPath) : ['src/**/__tests__/**/*.js']
-  )).catch(() => false);
+  return exec('mocha', ['--reporter', 'spec', '--require', 'tasks/mocha-bootload'].concat(allTests(filepaths) ? filepaths.map(srcPath) : ['src/**/__tests__/**/*.js'])).catch(function () {
+    return false;
+  });
 }
 
 function lintFiles(filepaths) {
   console.log('Linting Code\n');
 
-  return filepaths.reduce((prev, filepath) => prev.then(prevSuccess => {
-    process.stdout.write('  ' + filepath + ' ...');
-    return exec('eslint', [
-      srcPath(filepath)])
-      .catch(() => false)
-      .then(success => {
+  return filepaths.reduce(function (prev, filepath) {
+    return prev.then(function (prevSuccess) {
+      process.stdout.write('  ' + filepath + ' ...');
+      return exec('eslint', [srcPath(filepath)]).catch(function () {
+        return false;
+      }).then(function (success) {
         console.log(CLEARLINE + '  ' + (success ? CHECK : X) + ' ' + filepath);
         return prevSuccess && success;
       });
-  }), Promise.resolve(true));
+    });
+  }, Promise.resolve(true));
 }
 
 function typecheckStatus() {
   console.log('\nType Checking\n');
-  return exec(flowBinPath, ['status']).catch(() => false);
+  return exec(_flowBin2.default, ['status']).catch(function () {
+    return false;
+  });
 }
 
 // Filepath
 
 function srcPath(filepath) {
-  return resolvePath(srcDir, filepath);
+  return (0, _path.resolve)(srcDir, filepath);
 }
 
 // Predicates
@@ -206,21 +209,22 @@ function isTest(filepath) {
 
 var CLEARSCREEN = '\u001b[2J';
 var CLEARLINE = '\r\x1B[K';
-var CHECK = green('\u2713');
-var X = red('\u2718');
+var CHECK = green('✓');
+var X = red('✘');
 
 function invert(str) {
-  return `\u001b[7m ${str} \u001b[27m`;
+  return '\u001b[7m ' + str + ' \u001b[27m';
 }
 
 function red(str) {
-  return `\x1B[K\u001b[1m\u001b[31m${str}\u001b[39m\u001b[22m`;
+  return '\u001b[K\u001b[1m\u001b[31m' + str + '\u001b[39m\u001b[22m';
 }
 
 function green(str) {
-  return `\x1B[K\u001b[1m\u001b[32m${str}\u001b[39m\u001b[22m`;
+  return '\u001b[K\u001b[1m\u001b[32m' + str + '\u001b[39m\u001b[22m';
 }
 
 function yellow(str) {
-  return `\x1B[K\u001b[1m\u001b[33m${str}\u001b[39m\u001b[22m`;
+  return '\u001b[K\u001b[1m\u001b[33m' + str + '\u001b[39m\u001b[22m';
 }
+

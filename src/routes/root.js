@@ -1,10 +1,10 @@
-const router = require('express').Router();
+const rootRoute = require('express').Router();
 
 /* GET home page. */
-router.get('/', function (req, res) {
+rootRoute.get('/', function (req, res) {
   res.render('root', { title: 'Express' });
 });
 
 
-export const root = router;
+export const root = rootRoute;
 
