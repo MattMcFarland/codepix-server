@@ -151,7 +151,7 @@ var service = server.listen(address, function(req, res) {
         page.viewportSize = { width: 435, height: lines * 20 };
 
 
-        page.open('http://localhost:3000/api', settings, function(status) {
+        page.open('http://localhost:3000/api', JSON.parse(JSON.stringify(settings)), function(status) {
 
           res.statusCode = 200;
           if (status === 'success') {
