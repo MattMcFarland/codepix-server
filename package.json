@@ -2,6 +2,8 @@
   "name": "codepix-server",
   "version": "0.0.0",
   "scripts": {
+    "dev": "nodemon",
+    "debug": "iron-node ./lib/bin/server.js",
     "prepublish": "npm test && npm run build",
     "test": "npm run lint && npm run check && mocha $npm_package_options_mocha",
     "testonly": "mocha $npm_package_options_mocha",
