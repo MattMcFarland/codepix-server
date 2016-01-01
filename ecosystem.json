@@ -8,7 +8,7 @@
     // First application
     {
       name      : "codepix",
-      script    : "bin/script.js",
+      script    : "lib/bin/script.js",
       env: {
         PORT: "80",
         sslPort: "443"
