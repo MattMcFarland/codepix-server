@@ -4,7 +4,7 @@
  */
 import app from '../app';
 import { Rasterizer } from '../services/Rasterizer';
-import { http, debug } from './modules';
+import { http, debug, models } from './modules';
 
 /**
  * Setup Debug
@@ -37,9 +37,13 @@ new Rasterizer({
   debug: true
 }).startService().then(r => {
   app.set('rasterizer', r);
-  server.listen(port);
-  server.on('error', onError);
-  server.on('listening', onListening);
+  console.time('db connect');
+  models.sequelize.sync().then( () => {
+    console.timeEnd('db connect');
+    server.on('error', onError);
+    server.on('listening', onListening);
+    server.listen(port);
+  });
 });
 
 
@@ -104,3 +108,5 @@ function onListening() {
     : 'port ' + addr.port;
   debug('Listening on ' + bind);
 }
+
+

@@ -1,0 +1,16 @@
+{
+  "development": {
+    "username": "codepix",
+    "password": null,
+    "database": "codepix",
+    "host": "localhost",
+    "dialect": "postgres"
+  },
+  "production": {
+    "username": "codepix",
+    "password": null,
+    "database": "codepix",
+    "host": "localhost",
+    "dialect": "postgres"
+  }
+}

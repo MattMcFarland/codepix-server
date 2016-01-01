@@ -8,3 +8,4 @@ export const phantom = require('phantom');
 export const bodyParser = require('body-parser');
 export const winston = require('winston');
 export const crypto = require('crypto');
+export const hljs = require('highlight.js');

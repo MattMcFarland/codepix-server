@@ -1,5 +1,6 @@
 /* @flow */
 
+
 /**
  * Module dependencies.
  */
@@ -7,9 +8,9 @@ import {
   fs,
   phantom,
   chalk,
-  crypto
+  crypto,
+  hljs
 } from './modules';
-
 
 import {
   Service
@@ -41,6 +42,7 @@ const toJSON = (data:Object):string => {
   return str;
 };
 
+
 type File = {
   id: string,
   path:string,
@@ -71,7 +73,8 @@ type Meta = {
   description: string,
   image: string,
   createdAt: string,
-  size: string
+  size: string,
+  language: string
 }
 
 const createMeta = ({
@@ -87,7 +90,8 @@ const createMeta = ({
     url: 'http://codepix.io/c0dez/' + file.path,
     image: 'c0dez/' + file.path,
     createdAt: file.stats.birthtime,
-    size: file.stats.size
+    size: file.stats.size,
+    language: hljs.highlightAuto(code).language
   };
 };
 
