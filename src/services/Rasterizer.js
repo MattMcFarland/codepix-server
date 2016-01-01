@@ -156,7 +156,7 @@ export class Rasterizer extends Service {
   }
 
   // 6b3c25d7d8918eeda3230357a58ecf5ea20bf5f3
-  rasterizeCode(code: string):Promise<File> {
+  rasterizeCode(code: string):Promise<Meta> {
     this.logger('create internal page');
     let payload = this.getPayload(code);
     let lines = code.split(/\r\n|\r|\n/).length;
