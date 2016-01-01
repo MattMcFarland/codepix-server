@@ -7,8 +7,8 @@ import {
   favicon,
   logger,
   cookieParser,
-  bodyParser,
-  compression
+  bodyParser
+  // compression
 } from './modules';
 
 /**
@@ -29,7 +29,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
 
 // uncomment after placing your favicon in /public
-app.use(compression({level: 9}));
+// app.use(compression({level: 9}));
 app.use(favicon(path.join(staticpath, 'favicon.ico')));
 app.use(logger('dev'));
 app.use(bodyParser.json());
