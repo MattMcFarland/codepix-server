@@ -1,4 +1,8 @@
-const rootRoute = require('express').Router();
+import {
+  express
+} from './modules';
+
+const rootRoute = express.Router();
 
 /* GET home page. */
 rootRoute.get('/', function (req, res) {

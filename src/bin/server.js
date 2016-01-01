@@ -3,6 +3,7 @@
  * Import Dependencies
  */
 import app from '../app';
+import { Rasterizer } from '../services/Rasterizer';
 import { http, debug } from './modules';
 
 /**
@@ -30,9 +31,17 @@ const server = http.createServer(app);
  * Listen on provided port, on all network interfaces.
  */
 
-server.listen(port);
-server.on('error', onError);
-server.on('listening', onListening);
+new Rasterizer({
+  host: 'localhost',
+  port: port,
+  debug: true
+}).startService().then(r => {
+  app.set('rasterizer', r);
+  server.listen(port);
+  server.on('error', onError);
+  server.on('listening', onListening);
+});
+
 
 
 

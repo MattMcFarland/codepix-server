@@ -15,6 +15,7 @@ import {
  */
 import {
   api,
+  code,
   root
 } from './routes';
 
@@ -34,10 +35,16 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(staticpath));
-
-app.use('/', root);
+app.use('/c0dez/data', express.static('data'));
+app.use('/code', code);
+app.use('/api', function (req, res, next) {
+  if (app.get('rasterizer')) {
+    req.rasterizer = app.get('rasterizer');
+  }
+  next();
+});
 app.use('/api', api);
-
+app.use('/', root);
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
   var err = new Error('Not Found');

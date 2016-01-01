@@ -7,4 +7,4 @@ export const path = require('path');
 export const phantom = require('phantom');
 export const bodyParser = require('body-parser');
 export const winston = require('winston');
-
+export const crypto = require('crypto');

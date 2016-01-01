@@ -77,12 +77,12 @@ describe('=> Server', function () {
 
   describe('=> Rasterizer', function () {
     let rasterizer;
-    // let app = express();
+
     before((done) => {
       rasterizer = new Rasterizer({
         host: 'localhost',
         port: 5555,
-        debug: true
+        debug: false
       }).startService().then(r => {
         rasterizer = r;
         done();
@@ -94,12 +94,28 @@ describe('=> Server', function () {
     it('spawns the process', () => assertOK(rasterizer.service.process));
     it('process has PID', () => assertOK(rasterizer.service.process.pid));
 
-    it('rasterizes code', (done) => {
-      rasterizer
-        .rasterizeCode('console.log("test")',
-          'data/' + 'test' + '.png')
-        .then(done)
-        .catch(err => done(err));
+
+    describe('=> File Data', function () {
+      let file;
+      before((done) => {
+        rasterizer
+          .rasterizeCode('console.log("test")')
+          .then(f => {
+            file = f;
+            done();
+          }).catch(err => done(err));
+      });
+
+      it('filename and id sha1 hash is exact match of code', () => {
+        expect(file.id).to.equal('6b3c25d7d8918eeda3230357a58ecf5ea20bf5f3');
+      });
+
+
+      // TODO: Prevent files from being overwritten
+      // TODO: Create test to make sure that files cant be overwritten
+      // TODO: Test file should be deleted after the test passes
+
+
     });
 
   });

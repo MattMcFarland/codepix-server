@@ -1,22 +1,41 @@
 import {
   express,
-  hljs
+  hljs,
+  Chance
 } from './modules';
-
-
-
 
 let apiRoute = express.Router();
 
+apiRoute.get('/canvas', (req, res) => {
+  let rasterizer = req.rasterizer;
+  console.log(rasterizer);
 
-apiRoute.use((req, res, next) => {
-  console.log('request', req.body);
-  next();
+  res.json(rasterizer);
 });
 
+apiRoute.post('/add', function (req, res, next) {
+  if (req.rasterizer) {
+    let chance = new Chance();
+    let hash = chance.hash();
+    req.rasterizer.rasterizeCode(req.body.code,
+      'data/' + hash + '.png')
+      .then((file) => {
+        req.codepic = file;
+        next();
+      }).catch(err => {
+      console.error(err);
+    });
+  } else {
+    next();
+  }
+});
 
-apiRoute.get('/canvas', (req, res) => {
-  res.render('canvas', { title: 'CodePic' });
+apiRoute.post('/add', (req, res, next) => {
+  if (req.codepic) {
+    res.json(req.codepic);
+  } else {
+    next();
+  }
 });
 
 apiRoute.post('/', function (req, res, next) {

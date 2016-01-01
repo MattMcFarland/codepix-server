@@ -6,7 +6,8 @@
 import {
   fs,
   phantom,
-  chalk
+  chalk,
+  crypto
 } from './modules';
 
 
@@ -22,13 +23,6 @@ type ServiceConfig = {
   address: string,
   port: number
 };
-
-type File = {
-  path:string,
-  stats:Object
-}
-
-
 const defaults:ServiceConfig = {
   command: 'phantomjs',
   debug: false,
@@ -47,6 +41,11 @@ const toJSON = (data:Object):string => {
   return str;
 };
 
+type File = {
+  id: string,
+  path:string,
+  stats:Object
+}
 const toFile = (filePath:string):Promise<File> => {
   return new Promise((resolve, reject) => {
     fs.stat(filePath, (err, stats) => {
@@ -54,12 +53,49 @@ const toFile = (filePath:string):Promise<File> => {
         reject(err);
       } else {
         resolve({
+          id: filePath.split('.')[0].split('/')[1],
           path: filePath,
           stats: stats
         });
       }
     });
   });
+};
+
+type Meta = {
+  id: string,
+  card: string,
+  site: string,
+  creator: string,
+  title: string,
+  description: string,
+  image: string,
+  createdAt: string,
+  size: string
+}
+
+const createMeta = ({
+  code, file
+  }):Meta => {
+  return {
+    id: file.id,
+    card: 'summary_large_image',
+    site: '@codepix',
+    creator: '@docodemore',
+    title: 'Check out teh code',
+    description: code,
+    url: 'http://codepix.io/c0dez/' + file.path,
+    image: 'c0dez/' + file.path,
+    createdAt: file.stats.birthtime,
+    size: file.stats.size
+  };
+};
+
+const hash = (code:string):string => {
+  return crypto
+    .createHash('sha1')
+    .update(code)
+    .digest('hex');
 };
 
 export class Rasterizer extends Service {
@@ -119,11 +155,14 @@ export class Rasterizer extends Service {
     });
   }
 
-  rasterizeCode(code: string, filePath: string):Promise<File> {
+  // 6b3c25d7d8918eeda3230357a58ecf5ea20bf5f3
+  rasterizeCode(code: string):Promise<File> {
     this.logger('create internal page');
     let payload = this.getPayload(code);
     let lines = code.split(/\r\n|\r|\n/).length;
     let size = { width: 435, height: lines * 20 };
+    let filePath = 'data/' + hash(code) + '.png';
+
     return new Promise((resolve, reject) => {
       this.service.createPage((page, createError) => {
         if (createError) {
@@ -131,24 +170,27 @@ export class Rasterizer extends Service {
         } else {
           try {
             page.set('viewportSize', size);
-            this.logger(this.address);
-            this.logger(toJSON(payload));
+            this.logger('address', this.locals.address);
+            this.logger('payload:\n', toJSON(payload));
             page.open(this.locals.address, payload, (status) => {
-              this.logger(status);
+              this.logger('open status:', status);
               if (status === 'success') {
-                page.render(filePath, (res, pageError) => {
-                  this.logger(res);
-                  if (pageError || !res) {
-                    reject(pageError);
-                  }
-
+                page.render(filePath, () => {
                   toFile(filePath).then(file => {
-                    console.log(file);
-                    resolve(file);
-                  }).catch(fileError => reject(fileError));
+                    this.logger('file created:\n', toJSON(file));
+                    fs.writeFile(filePath + '.meta.json',
+                      toJSON(createMeta({code, file})),
+                      (metaError) => {
+                        if (metaError) {
+                          reject(metaError);
+                        } else {
+                          resolve(createMeta({code, file}));
+                        }
+                      });
+                  }).catch(err => reject(err));
                 });
               } else {
-                this.logger(this.address);
+                this.logger('address', this.locals.address);
                 this.logger(toJSON(payload));
                 reject(new Error('page open failed'));
               }
