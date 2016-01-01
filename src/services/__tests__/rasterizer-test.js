@@ -96,8 +96,9 @@ describe('=> Server', function () {
 
 
     describe('=> File Data', function () {
+      this.timeout(5000);
       let file;
-      before((done) => {
+      before(function(done) {
         rasterizer
           .rasterizeCode('console.log("test")')
           .then(f => {
@@ -106,7 +107,7 @@ describe('=> Server', function () {
           }).catch(err => done(err));
       });
 
-      it('filename and id sha1 hash is exact match of code', () => {
+      it('filename and id sha1 hash is exact match of code', function() {
         expect(file.id).to.equal('6b3c25d7d8918eeda3230357a58ecf5ea20bf5f3');
       });
 
