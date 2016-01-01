@@ -2,6 +2,7 @@
   "name": "codepix-server",
   "version": "0.0.2",
   "scripts": {
+    "postinstall": "npm run build",
     "dev": "gulp",
     "debug": "npm start",
     "prepublish": "npm test && npm run build",
