@@ -54,7 +54,7 @@ process.on('SIGINT', () => {
 describe('=> Server', function () {
   var app;
   var server;
-  var db;
+
   before((done) => {
 
     const logFile = ('rasterizer-test.log');
@@ -109,9 +109,8 @@ describe('=> Server', function () {
   describe('=> Database', function () {
 
     it('connects to database', (done) => {
-      connect().then((_db) => {
-        assertOK(_db);
-        db = _db;
+      connect().then((db) => {
+        assertOK(db);
         done();
       }).catch(done);
     });
@@ -128,51 +127,33 @@ describe('=> Server', function () {
         debug: false
       }).startService().then(r => {
         rasterizer = r;
+
         done();
       }).catch(err => done(err));
     });
 
-    it('Rasterizer instance has executed and is running.', () => {
-      assertOK(rasterizer.service.process.pid);
-    });
+    it('has instance', () => assertOK(rasterizer));
+    it('instance has service', () => assertOK(rasterizer.service));
+    it('spawns the process', () => assertOK(rasterizer.service.process));
+    it('process has PID', () => assertOK(rasterizer.service.process.pid));
 
 
     describe('=> File Data', function () {
       this.timeout(5000);
-      let md;
-      it('writes to db', function (done) {
+      let file;
+      before(function (done) {
         rasterizer
           .rasterizeCode('console.log("test")')
-          .then(meta => {
-            assertOK(db);
-            assertOK(meta);
-            md = meta;
-            db.Card.create({
-              creator: meta.creator,
-              title: meta.title,
-              url: meta.url,
-              image: meta.image,
-              size: meta.size,
-              description: meta.description,
-              shasum: meta.id
-            }).then(newcard => {
-              if (meta.language) {
-                console.log(meta.language);
-                newcard
-                  .addTag({name: meta.language})
-                  .then(done)
-                  .catch(done);
-              } else {
-                done();
-              }
-            }).catch(err => done(err));
+          .then(f => {
+            file = f;
+            done();
           }).catch(err => done(err));
       });
 
-
       it('filename and id sha1 hash is exact match of code', function () {
-        expect(md.id).to.equal('6b3c25d7d8918eeda3230357a58ecf5ea20bf5f3');
+        expect(file.id).to.equal('6b3c25d7d8918eeda3230357a58ecf5ea20bf5f3');
       });
+
 
       // TODO: Prevent files from being overwritten
       // TODO: Create test to make sure that files cant be overwritten
