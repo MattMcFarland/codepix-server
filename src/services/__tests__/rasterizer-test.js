@@ -6,7 +6,8 @@ import {
   request,
   bodyParser,
   path,
-  winston
+  winston,
+  compression
 } from '../modules';
 
 /** Test Modules **/
@@ -70,7 +71,7 @@ describe('=> Server', function () {
     app.set('views', path.join(__dirname, '../../../views'));
     app.set('view engine', 'hbs');
 
-
+    app.use(compression({level: 9}));
     app.use(bodyParser.urlencoded({ extended: true }));
     app.use(bodyParser.json());
 
