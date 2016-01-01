@@ -6,12 +6,11 @@ import {
 
 let apiRoute = express.Router();
 
-apiRoute.get('/canvas', (req, res) => {
-  let rasterizer = req.rasterizer;
-  console.log(rasterizer);
-
-  res.json(rasterizer);
+apiRoute.get('/code/:id', (req, res) => {
+  let data = require('../../data/' + req.params.id + '.png.meta.json');
+  res.json(data);
 });
+
 
 apiRoute.post('/add', function (req, res, next) {
   if (req.rasterizer) {

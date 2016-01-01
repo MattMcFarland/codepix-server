@@ -15,7 +15,6 @@ import {
  */
 import {
   api,
-  code,
   root
 } from './routes';
 
@@ -36,7 +35,6 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(staticpath));
 app.use('/c0dez/data', express.static('data'));
-app.use('/code', code);
 app.use('/api', function (req, res, next) {
   if (app.get('rasterizer')) {
     req.rasterizer = app.get('rasterizer');
