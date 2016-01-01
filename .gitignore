@@ -452,3 +452,5 @@ bower_components
 
 # distribution
 lib
+
+rasterizer-test.log

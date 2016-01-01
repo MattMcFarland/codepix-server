@@ -1,173 +1,198 @@
 /* @flow */
 
 /**
-* Module dependencies.
-*/
+ * Module dependencies.
+ */
 import {
-  childProcess,
-  request
+  fs,
+  phantom,
+  chalk
 } from './modules';
+
 
 import {
   Service
 } from './Service';
-
-
-const spawn = childProcess.spawn;
 
 type ServiceConfig = {
   command: string,
   debug: boolean,
   host: string,
   path: string,
-  pingDelay: number,
-  port: number,
-  sleepTime: number
+  address: string,
+  port: number
 };
+
+type File = {
+  path:string,
+  stats:Object
+}
+
 
 const defaults:ServiceConfig = {
   command: 'phantomjs',
   debug: false,
-  host: 'http://127.0.0.1',
+  host: '127.0.0.1',
   path: '/tmp',
-  pingDelay: 10000,
-  port: 3001,
-  sleepTime: 30000
+  address: 'http://localhost:3000/api',
+  port: 3000
+};
+
+/**
+ * Private Functions
+ */
+const toJSON = (data:Object):string => {
+  let str = JSON.stringify(data, null, 2);
+  JSON.parse(str);
+  return str;
+};
+
+const toFile = (filePath:string):Promise<File> => {
+  return new Promise((resolve, reject) => {
+    fs.stat(filePath, (err, stats) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve({
+          path: filePath,
+          stats: stats
+        });
+      }
+    });
+  });
 };
 
 export class Rasterizer extends Service {
-  isStopping: boolean;
-  lastHealthCheckDate: any;
-  vars: ServiceConfig;
-  service: Object;
-  pingServiceIntervalId: number;
-  checkHealthIntervalId: number;
+  locals:ServiceConfig;
 
-
-  handleExit():void {
-    if (this.isStopping) {
-      return;
+  logger(...message:any):void {
+    if (this.locals.debug) {
+      console.log(
+        '\n ',
+        chalk.cyan('Rasterizer:'),
+        chalk.white(...message),
+        '\n'
+      );
     }
-    console.log('phantomjs failed; restarting');
-    this.startService();
   }
 
   handleStdOut(data:Object):void {
-    console.log('Rasterizer', data);
+    this.logger('service:stdout > ', toJSON(data));
   }
-
-
   handleStdErr(data:Object):void {
-    console.error('Rasterizer', data);
+    this.logger('service:stderr > ', toJSON(data));
+  }
+  handleStdExt(data:Object):void {
+    this.logger('service:stderr > ', toJSON(data));
+  }
+  handleStdReq(data:Object):void {
+    this.logger('service:request > ', toJSON(data));
   }
 
-  spawnProcess():void {
-    this.service = spawn(this.vars.command, [
-      'phantom/codepic.js',
-      this.getPath(),
-      this.getUrl()
-    ]);
+  spawnPhantom():Promise {
+    return new Promise((resolve, reject) => {
+      phantom.create(service => {
+        if (service) {
+          this.logger('Process created', service.process.pid);
+          service.process.stdout.on('data', this.handleStdOut);
+          service.process.stderr.on('data', this.handleStdErr);
+          service.process.stderr.on('exit', this.handleStdExt);
+          resolve(service);
+        } else {
+          reject('spawnPhantom failed');
+        }
+      });
+    });
   }
 
-  initProcessListeners():void {
-    if (this.vars.debug) {
-      this.service.stdout.on('data', this.handleStdOut);
-    }
-    this.service.stderr.on('data', this.handleStdErr);
-    this.service.on('exit', this.handleExit);
+  getPayload(code:string):Object {
+    return ({
+      operation: 'POST',
+      encoding: 'utf8',
+      headers: {
+        'Content-Type': 'application/json',
+        accept: 'application/json',
+        connection: 'close',
+        'accept-encoding': 'gzip, deflate'
+      },
+      data: toJSON({ code })
+    });
   }
 
+  rasterizeCode(code: string, filePath: string):Promise<File> {
+    this.logger('create internal page');
+    let payload = this.getPayload(code);
+    let lines = code.split(/\r\n|\r|\n/).length;
+    let size = { width: 435, height: lines * 20 };
+    return new Promise((resolve, reject) => {
+      this.service.createPage((page, createError) => {
+        if (createError) {
+          reject(createError);
+        } else {
+          try {
+            page.set('viewportSize', size);
+            this.logger(this.address);
+            this.logger(toJSON(payload));
+            page.open(this.locals.address, payload, (status) => {
+              this.logger(status);
+              if (status === 'success') {
+                page.render(filePath, (res, pageError) => {
+                  this.logger(res);
+                  if (pageError || !res) {
+                    reject(pageError);
+                  }
 
+                  toFile(filePath).then(file => {
+                    console.log(file);
+                    resolve(file);
+                  }).catch(fileError => reject(fileError));
+                });
+              } else {
+                this.logger(this.address);
+                this.logger(toJSON(payload));
+                reject(new Error('page open failed'));
+              }
+            });
+          } catch (pageOpenError) {
+            reject(pageOpenError);
+          }
+        }
+      });
+    });
+  }
 
-  startService():Rasterizer {
-    this.spawnProcess();
-    this.initProcessListeners();
-    this.lastHealthCheckDate = Date.now();
-    this.pingServiceIntervalId = setInterval(
-      this.pingService, this.getPingDelay());
-    this.checkHealthIntervalId = setInterval(
-      this.checkHealth, 1000);
-    if (this.vars.debug) {
-      console.log('Phantomjs internal server listening on port ' +
-        this.getPort());
-    }
-    return this;
+  startService():Promise<Rasterizer> {
+    this.logger('Starting service...');
+    return new Promise((resolve, reject) => {
+      this.spawnPhantom().then(service => {
+        this.service = service;
+        resolve(this);
+      }).catch(err => reject(err));
+    });
   }
 
   killService():void {
     if (this.service) {
       // Remove the exit listener to prevent the rasterizer from restarting
-      this.service.removeListener('exit', this.handleExit);
-      this.service.kill();
-      clearInterval(this.pingServiceIntervalId);
-      clearInterval(this.checkHealthIntervalId);
-      console.log('Stopping Phantomjs internal server');
+      this.service.process.removeListener('exit', this.handleStdExt);
+      this.service.process.kill();
+      this.logger('Process killed', this.service.process.pid);
     }
   }
-
-  restartService():void {
-    if (this.service) {
-      this.killService();
-      this.startService();
-    }
-  }
-
-  pingService():Promise {
-    return new Promise((resolve, reject) => {
-      if (!this.service) {
-        this.lastHealthCheckDate = 0;
-      }
-      request(this.getUrl() + '/healthCheck', (error, response) => {
-        console.log(this.getUrl() + '/healthCheck', error, response);
-        this.lastHealthCheckDate = Date.now();
-        if (error || response.statusCode !== 200) {
-          reject(error);
-        } else {
-          resolve(response);
-        }
-      });
-    });
-
-  }
-
-  checkHealth():void {
-    if (Date.now() - this.lastHealthCheckDate > this.vars.sleepTime) {
-      console.log('Phantomjs process is sleeping. Restarting.');
-      this.restartService();
-    }
-  }
-
-  getPingDelay():number {
-    return this.vars.pingDelay;
-  }
-
-  getUrl():string {
-    return this.vars.host + ':' + this.vars.port;
-  }
-
-  getHost():string {
-    return this.vars.host;
-  }
-
-  getPort():number {
-    return this.vars.port;
-  }
-
-  getPath():string {
-    return this.vars.path;
-  }
-
-
   constructor(options:ServiceConfig):void {
     super();
-    this.vars = Object.assign({}, defaults, options);
-    this.isStopping = false;
-    this.lastHealthCheckDate = null;
+
+    this.locals = Object.assign({}, defaults, options);
+
+    this.locals.address = 'http://' + options.host +
+      ':' + options.port + '/api';
+
     process.on('exit', () => {
-      this.isStopping = true;
+      this.logger('Stopping service...');
       this.killService();
     });
 
   }
+
 }
 

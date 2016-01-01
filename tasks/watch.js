@@ -35,12 +35,14 @@ import sane from 'sane';
 import { resolve as resolvePath } from 'path';
 import { spawn } from 'child_process';
 import flowBinPath from 'flow-bin';
-
+import figlet from 'figlet';
 
 process.env.PATH += ':./node_modules/.bin';
 
 var cmd = resolvePath(__dirname);
 var srcDir = resolvePath(cmd, './src');
+
+
 
 function exec(command, options) {
   return new Promise(function (resolve, reject) {
@@ -49,6 +51,7 @@ function exec(command, options) {
       env: process.env,
       stdio: 'inherit'
     });
+    // Checking steps
     child.on('exit', function (code) {
       if (code === 0) {
         resolve(true);
@@ -82,8 +85,24 @@ var needsCheck;
 var toCheck = {};
 var timeout;
 
+function logTask (str) {
+  console.log('\n', yellow('=========='), str, '\n');
+}
+
 function startWatch() {
-  process.stdout.write(CLEARSCREEN + green(invert('watching...')));
+  figlet('Fresh', function(err, data) {
+    if (err) {
+      console.log('Something went wrong...');
+      console.dir(err);
+      return;
+    }
+    process.stdout.write(
+      CLEARSCREEN + yellow(data) + '\n' +
+      green(invert('watching...')
+      )
+    );
+
+  });
 }
 
 function changeFile(filepath, root, stat) {
@@ -135,10 +154,10 @@ function checkFiles(filepaths) {
     });
 }
 
-// Checking steps
 
 function parseFiles(filepaths) {
-  console.log('Checking Syntax');
+
+  logTask('Checking Syntax');
 
   return Promise.all(filepaths.map(filepath => {
     if (isJS(filepath) && !isTest(filepath)) {
@@ -152,7 +171,7 @@ function parseFiles(filepaths) {
 }
 
 function runTests(filepaths) {
-  console.log('\nRunning Tests');
+  logTask('Running Tests');
 
   return exec('mocha', [
     '--reporter', 'spec',
@@ -163,7 +182,7 @@ function runTests(filepaths) {
 }
 
 function lintFiles(filepaths) {
-  console.log('Linting Code\n');
+  logTask('Linting Code');
 
   return filepaths.reduce((prev, filepath) => prev.then(prevSuccess => {
     process.stdout.write('  ' + filepath + ' ...');
@@ -177,8 +196,10 @@ function lintFiles(filepaths) {
   }), Promise.resolve(true));
 }
 
+
+
 function typecheckStatus() {
-  console.log('\nType Checking\n');
+  logTask('Type Checking');
   return exec(flowBinPath, ['status']).catch(() => false);
 }
 

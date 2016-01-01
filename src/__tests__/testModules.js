@@ -14,7 +14,7 @@ const assertOK = (obj) => {
   return expect(obj).to.not.be.an('undefined');
 };
 
-describe('Module Dependencies', () =>{
+describe('app.js Module Dependencies', () =>{
 
   it('imports express', () => assertOK(express));
 

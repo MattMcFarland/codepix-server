@@ -10,6 +10,9 @@ import { http, debug } from './modules';
  */
 debug('codepix:server');
 
+// pretty errors for the win
+require('pretty-error').start();
+
 /**
  * Get port from environment and store in Express.
  */

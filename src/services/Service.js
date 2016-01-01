@@ -6,28 +6,20 @@ class Base {
 
 }
 
-
-
-
 export class Service extends Base {
   constructor() {
     super();
     this.bindAll(
-      'handleExit',
+      'logger',
       'handleStdOut',
       'handleStdErr',
-      'spawnProcess',
-      'initProcessListeners',
+      'handleStdExt',
+      'handleStdReq',
+      'spawnPhantom',
+      'getPayload',
+      'rasterizeCode',
       'startService',
-      'killService',
-      'restartService',
-      'pingService',
-      'checkHealth',
-      'getPingDelay',
-      'getUrl',
-      'getHost',
-      'getPort',
-      'getPath'
+      'killService'
     );
   }
 }
