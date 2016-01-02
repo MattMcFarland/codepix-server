@@ -1,7 +1,6 @@
 import {
   http,
-  https,
-  debug
+  https
 } from '../modules';
 
 import { expect } from 'chai';
@@ -16,7 +15,5 @@ describe('server.js Module Dependencies', () =>{
   it('imports http', () => assertOK(http));
 
   it('imports https', () => assertOK(https));
-
-  it('imports debug', () => assertOK(debug));
 
 });

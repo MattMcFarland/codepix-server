@@ -4,12 +4,8 @@
  */
 import app from '../app';
 import { Rasterizer } from '../services/Rasterizer';
-import { http, debug } from './modules';
+import { http } from './modules';
 
-/**
- * Setup Debug
- */
-debug('codepix:server');
 
 // pretty errors for the win
 require('pretty-error').start();
@@ -102,7 +98,7 @@ function onListening() {
   var bind = typeof addr === 'string'
     ? 'pipe ' + addr
     : 'port ' + addr.port;
-  debug('Listening on ' + bind);
+  console.log('Listening on ' + bind);
 }
 
 
