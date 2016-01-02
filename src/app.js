@@ -8,7 +8,8 @@ import {
   logger,
   cookieParser,
   bodyParser,
-  compression
+  compression,
+  expressPhantom
 } from './modules';
 
 /**
@@ -29,10 +30,12 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
 
 app.use(compression({level: 9, filter: shouldCompress}));
+app.use(expressPhantom.SEORender);
 
 function shouldCompress(req, res) {
   if (req.headers['x-no-compression']) {
     // don't compress responses with this request header
+    console.log('no compression');
     return false;
   }
   // fallback to standard filter function

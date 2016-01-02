@@ -5,3 +5,5 @@ export const logger = require('morgan');
 export const cookieParser = require('cookie-parser');
 export const bodyParser = require('body-parser');
 export const compression = require('compression');
+export const expressPhantom = require('express-phantom');
+
