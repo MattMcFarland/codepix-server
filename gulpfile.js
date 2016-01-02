@@ -44,7 +44,7 @@ gulp.task('nodemon', function (cb) {
   return nodemon({
     restartable: 'rs',
     verbose: false,
-    exec: 'npm run build && npm start',
+    exec: 'npm start',
     watch: [
     'src/**/*.js'
   ],

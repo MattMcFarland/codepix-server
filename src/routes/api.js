@@ -24,6 +24,7 @@ apiRoute.get('/list', (req, res, next) => {
     }
 
     files.forEach((file, i) => {
+
       if (file.indexOf('json') > -1 ) {
         let fileData = require(path.join(__dirname,'../../data', file));
          data.push(fileData);

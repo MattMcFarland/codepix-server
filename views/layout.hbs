@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <title>{{title}}</title>
-    <meta name="description" content={{description}}>
+    <meta name="description" content="codepix: Convert your syntax to tweet-sized images">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
@@ -21,6 +21,36 @@
     <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="manifest" href="/manifest.json">
+
+    <meta name="twitter:site" content="@codepix">
+    <meta name="twitter:domain" content="codepix.io">
+    <meta name="twitter:creator" content="@codepix">
+
+    {{#if image_url}}
+        <link rel="canonical" href="{{url}}">
+        <meta property="og:url" content="{{url}}">
+        <meta property="og:site_name" content="codepix">
+
+        <meta name="twitter:title" content="I made this with codepix">
+        <meta property="og:title" content="I made this with codepix">
+
+
+        <meta property="author" content="codepix">
+        <meta property="article:author" content="codepix">
+
+
+
+        <link rel="image_src" href="{{image_url}}">
+        <meta name="twitter:card" content="photo">
+        <meta name="twitter:image" content="{{image_url}}">
+        <meta property="og:type" content="article">
+        <meta property="og:image" content="{{image_url}}">
+
+        <meta property="og:description" content="codepix: Convert your syntax to tweet-sized images">
+        <meta name="twitter:description" content="codepix: Convert your syntax to tweet-sized images">
+
+    {{/if}}
+
 </head>
 <body>
 <!--[if IE]>
