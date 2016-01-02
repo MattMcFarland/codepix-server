@@ -23,12 +23,13 @@ import { describe,
 import { Rasterizer } from '../Rasterizer';
 import { api } from '../../routes';
 
-const models = require('../../db/models');
+/* const models = require('../../db/models'); */
 
 const assertOK = (obj) => {
   return expect(obj).to.not.be.an('undefined');
 };
 
+/*
 const connect = () => {
   return new Promise((resolve, reject) => {
     try {
@@ -40,6 +41,7 @@ const connect = () => {
     }
   });
 };
+*/
 process.on('uncaughtException', (err) => {
   console.error('[uncaughtException]', err);
   process.exit(1);
@@ -106,7 +108,7 @@ describe('=> Server', function () {
       .end(done);
   });
 
-
+  /*
   describe('=> Database', function () {
 
     it('connects to database', (done) => {
@@ -117,6 +119,7 @@ describe('=> Server', function () {
     });
 
   });
+  */
 
   describe('=> Rasterizer', function () {
     let rasterizer;
