@@ -151,6 +151,7 @@ export class Rasterizer extends Service {
       encoding: 'utf8',
       headers: {
         'Content-Type': 'application/json',
+        'x-no-compression': 'true',
         accept: 'application/json',
         connection: 'close',
         'accept-encoding': 'gzip, deflate'

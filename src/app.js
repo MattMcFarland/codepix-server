@@ -7,8 +7,8 @@ import {
   favicon,
   logger,
   cookieParser,
-  bodyParser
-  // compression
+  bodyParser,
+  compression
 } from './modules';
 
 /**
@@ -28,8 +28,17 @@ const staticpath = path.join(
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
 
-// uncomment after placing your favicon in /public
-// app.use(compression({level: 9}));
+app.use(compression({level: 9, filter: shouldCompress}));
+
+function shouldCompress(req, res) {
+  if (req.headers['x-no-compression']) {
+    // don't compress responses with this request header
+    return false;
+  }
+  // fallback to standard filter function
+  return compression.filter(req, res);
+}
+
 app.use(favicon(path.join(staticpath, 'favicon.ico')));
 app.use(logger('dev'));
 app.use(bodyParser.json());
