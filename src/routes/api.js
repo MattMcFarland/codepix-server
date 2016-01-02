@@ -1,7 +1,9 @@
 import {
   express,
   hljs,
-  Chance
+  Chance,
+  fs,
+  path
 } from './modules';
 
 let apiRoute = express.Router();
@@ -11,6 +13,30 @@ apiRoute.get('/code/:id', (req, res) => {
   res.json(data);
 });
 
+apiRoute.get('/list', (req, res, next) => {
+
+  fs.readdir(path.join(__dirname,'../../data'), (err, files) => {
+    let data = [];
+
+    if (err) {
+      next(err);
+      return;
+    }
+
+    files.forEach((file, i) => {
+      if (file.indexOf('json') > -1 ) {
+        let fileData = require(path.join(__dirname,'../../data', file));
+         data.push(fileData);
+        if (i === files.length - 1) {
+          res.json(data);
+        }
+      }
+    });
+
+  });
+
+
+});
 
 apiRoute.post('/add', function (req, res, next) {
   if (req.rasterizer) {
