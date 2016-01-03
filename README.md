@@ -15,7 +15,9 @@ TODOS:
 
 - [ ] show how the images are converted in a way that preserves their appearance on twitter.
 
-- [ ] fix responsive issues
+- [x] fix responsive issues
+
+- [ ] add min-text validation
 
 ### testers
 
