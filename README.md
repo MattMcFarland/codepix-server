@@ -6,6 +6,13 @@ Package for the server http://codepix.io
 [![Coverage Status](https://coveralls.io/repos/MattMcFarland/codepix-server/badge.svg?branch=master&service=github)](https://coveralls.io/github/MattMcFarland/codepix-server?branch=master)
 
 
+TODOS:
+
+- [ ] use some database
+
+- [ ] show the language being used at the
+      top of each post (like near the time)
+
 ### testers
 
 tatadile@gmail.com
