@@ -1,3 +1,4 @@
+
 /**
  * Import Node Modules
  */
@@ -5,7 +6,6 @@ import {
   express,
   path,
   favicon,
-  logger,
   cookieParser,
   bodyParser,
   compression,
@@ -19,6 +19,7 @@ import {
   api,
   root
 } from './routes';
+
 
 // app setup
 const app = express();
@@ -43,11 +44,13 @@ function shouldCompress(req, res) {
 }
 
 app.use(favicon(path.join(staticpath, 'favicon.ico')));
-app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(staticpath));
+
+
+
 app.use('/c0dez/data', express.static('data'));
 app.use('/api', function (req, res, next) {
   if (app.get('rasterizer')) {

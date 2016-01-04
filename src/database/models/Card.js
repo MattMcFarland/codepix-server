@@ -10,9 +10,13 @@ module.exports = function (sequelize, DataTypes) {
       },
       shasum: DataTypes.STRING,
       title: DataTypes.STRING,
-      url: DataTypes.STRING,
-      image: DataTypes.STRING,
+      description: DataTypes.TEXT,
+      content: DataTypes.TEXT,
+      shareUrl: DataTypes.STRING,
+      imageUrl: DataTypes.STRING,
       size: DataTypes.INTEGER,
+      width: DataTypes.INTEGER,
+      height: DataTypes.INTEGER,
       score: {
         type: new DataTypes.VIRTUAL(DataTypes.INTEGER),
         get() {

@@ -1,5 +1,5 @@
+
 module.exports = function (sequelize, DataTypes) {
-  var customTypes = require('./customTypes')(DataTypes);
   var User = sequelize.define('User', {
     type: {
       type: new DataTypes.VIRTUAL(DataTypes.STRING),
@@ -10,7 +10,9 @@ module.exports = function (sequelize, DataTypes) {
     displayName: {
       type: DataTypes.STRING
     },
-    stormpath: customTypes.URL
+    username: DataTypes.STRING,
+    password: DataTypes.STRING,
+    email: DataTypes.STRING
   }, {
     classMethods: {
       associate: (models) => {

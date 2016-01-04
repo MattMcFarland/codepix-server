@@ -3,8 +3,12 @@ import {
   hljs,
   Chance,
   fs,
-  path
+  path,
+  passport
+
 } from './modules';
+
+import { User } from '../database';
 
 let apiRoute = express.Router();
 
@@ -79,6 +83,64 @@ apiRoute.post('/', function (req, res, next) {
   }
 
 });
+
+
+apiRoute.post('/login', (req, res, next) => {
+  console.log(req.body);
+  passport.authenticate('local', (err, user, info) => {
+    console.log(err, user, info);
+    if (err) {
+      return next(err);
+    }
+    if (!user) {
+      res.status(400);
+      res.json(info);
+    }
+    req.logIn(user, (loginError) => {
+      if (loginError) {
+        return next(loginError);
+      }
+      res.status(200);
+      res.json(info);
+    });
+  })(req, res, next);
+});
+
+apiRoute.post('/logout', (req, res) => {
+  req.logout();
+  res.json({logout: true});
+});
+
+const bcrypt = require('bcrypt');
+function hashPassword(cleartext) {
+  return new Promise((resolve, reject) => {
+    bcrypt.genSalt(10, (error, salt) => {
+      if (error) {
+        return reject(error);
+      }
+      bcrypt.hash(cleartext, salt, (h) => {
+        resolve(h);
+      });
+    });
+  });
+}
+
+apiRoute.post('/signup', (req, res, next) => {
+  if (req.user) {
+    res.status(400);
+    res.json({msg: 'already logged in'});
+  } else {
+    hashPassword(req.body.password).then(pwd => {
+      User.create({
+        username: req.body.username,
+        password: pwd}).then(() => {
+        res.status(200);
+        res.json({msg: 'success'});
+      }).catch(next);
+    }).catch(next);
+  }
+});
+
 
 
 export const api = apiRoute;
