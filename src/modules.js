@@ -10,3 +10,4 @@ export const winston = require('winston');
 export const request = require('supertest');
 export const session = require('express-session');
 export const passport = require('passport');
+export const LocalStrategy = require('passport-local');

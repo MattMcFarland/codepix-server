@@ -1,23 +1,31 @@
 import {
-  User,
-  passport
+  User
 } from '../database';
 
+const crypto = require('crypto');
+const passport = require('passport');
+
+const hash = (pwd) => {
+  return crypto
+    .createHash('sha1')
+    .update(pwd)
+    .digest('hex');
+};
 
 /**
  * @usage passport.use(new LocalStrategy(strategy));
  */
 export function strategy(username, password, done) {
-  User.findOne({ username: username }, function (err, user) {
-    if (err) { return done(err); }
+  console.log('testing', username, password);
+  User.findOne({ where: { username: username } }).then(user => {
     if (!user) {
       return done(null, false, { message: 'Incorrect username.' });
     }
-    if (!user.validPassword(password)) {
+    if (hash(password) !== user.password) {
       return done(null, false, { message: 'Incorrect password.' });
     }
     return done(null, user);
-  });
+  }).catch(done);
 }
 
 /**
@@ -42,7 +50,9 @@ export function deserializeUser(id, done) {
  */
 export function onAuthenticate() {
   return function (req, res, next) {
+    console.log('\n', req.body, '\n');
     passport.authenticate('local', function (err, user, info) {
+      console.log(err, info);
       if (err) {
         return next(err);
       }

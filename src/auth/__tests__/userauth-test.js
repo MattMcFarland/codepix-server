@@ -23,8 +23,8 @@ import { describe,
 
 /** App Modules */
 import { api } from '../../routes';
-import { connect } from '../utils';
-
+import { connect } from '../../database/utils';
+import { strategy, serializeUser, deserializeUser} from '../cedepixAuth';
 const OK = (obj) => {
   return expect(obj).to.not.be.an('undefined');
 };
@@ -42,6 +42,7 @@ describe('models/User.js => database', () => {
 
     });
   });
+
 
   it('Connection exists.', () => OK(db));
   it('User model exists.', () => OK(User));
@@ -68,16 +69,10 @@ describe('models/User.js => database', () => {
       app.use(session({ secret: 'super-secret' }));
       app.use(passport.initialize());
       app.use(passport.session());
-      var BasicStrategy = require('passport-http').BasicStrategy;
-      passport.use('local', new BasicStrategy(
-        (username, password, cb) => {
-          User.findOne({ username: username }).then(user => {
-            if (!user) { return cb(null, false); }
-            return cb(null, user);
-          });
-        }
-      ));
-
+      var LocalStrategy = require('passport-local').Strategy;
+      passport.use('local', new LocalStrategy(strategy));
+      passport.serializeUser(serializeUser);
+      passport.deserializeUser(deserializeUser);
       app.use((req, res, next) => {
         logger.log('info', {body: req.body, headers: req.headers});
         next();
@@ -163,29 +158,26 @@ describe('models/User.js => database', () => {
           .end(done);
       });
 
-      it('fails login', (done) => {
+      it('bas username fail', (done) => {
         request(app)
           .post('/api/login')
-          .type('form')
-          .send('username=asdfadf&password=sdfgsdfg')
-          .expect(400)
+          .send({username: 'asdf', password: 'asdf'})
+          .expect(401)
           .end(done);
       });
 
-      it('fails login', (done) => {
+      it('bad password fail', (done) => {
         request(app)
           .post('/api/login')
-          .type('form')
-          .send('username=someuser&password=sdfgsdfg')
-          .expect(400)
+          .send({username: 'someuser', password: 'asdf'})
+          .expect(401)
           .end(done);
       });
 
       it('succeeds login', (done) => {
         request(app)
           .post('/api/login')
-          .type('form')
-          .send('username=someuser&password=password')
+          .send({username: 'someuser', password: 'password'})
           .expect(200)
           .end(done);
       });
