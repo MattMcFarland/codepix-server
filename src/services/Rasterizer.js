@@ -15,7 +15,18 @@ import {
 import {
   Service
 } from './Service';
-
+type Dimensions = {
+  width: number,
+  height: number
+}
+type Data = {
+  payload: Object,
+  lines: number,
+  dimensions: Dimensions,
+  filePath: string,
+  page: Object,
+  code: ?string
+};
 type ServiceConfig = {
   command: string,
   debug: boolean,
@@ -24,6 +35,19 @@ type ServiceConfig = {
   address: string,
   port: number
 };
+type File = {
+  id: string,
+  path:string,
+  stats:Object
+}
+type Meta = {
+  shasum: string,
+  filename: string,
+  code: string,
+  size: Object,
+  detectedLanguage: string
+}
+
 const defaults:ServiceConfig = {
   command: 'phantomjs',
   debug: false,
@@ -43,11 +67,7 @@ const toJSON = (data:Object):string => {
 };
 
 
-type File = {
-  id: string,
-  path:string,
-  stats:Object
-}
+
 const toFile = (filePath:string):Promise<File> => {
   return new Promise((resolve, reject) => {
     fs.stat(filePath, (err, stats) => {
@@ -63,37 +83,37 @@ const toFile = (filePath:string):Promise<File> => {
     });
   });
 };
-
-type Meta = {
-  id: string,
-  card: string,
-  site: string,
-  creator: string,
-  title: string,
-  description: string,
-  image: string,
-  createdAt: string,
-  size: string,
-  language: string
-}
-
 const createMeta = ({
   code, file
   }):Meta => {
   return {
-    id: file.id,
-    card: 'summary_large_image',
-    site: '@codepix',
-    creator: '@docodemore',
-    title: 'Check out teh code',
-    description: code,
-    url: 'http://codepix.io/c0dez/' + file.path,
-    image: 'c0dez/' + file.path,
-    createdAt: file.stats.birthtime,
+    shasum: file.id,
+    code: code,
+    filename: file.id + '.png',
     size: file.stats.size,
-    language: hljs.highlightAuto(code).language
+    detectedLanguage: hljs.highlightAuto(code).language
   };
 };
+
+const write = (data:Data):Promise => {
+  return new Promise((resolve, reject) => {
+    toFile(data.filePath).then(file => {
+      fs.writeFile(data.filePath + '.meta.json',
+        toJSON(createMeta({code: data.code || '', file})),
+        (metaError) => {
+          if (metaError) {
+            reject(metaError);
+          } else {
+            resolve(createMeta({code: data.code || '', file}));
+          }
+        });
+    });
+  });
+};
+
+
+
+
 
 const hash = (code:string):string => {
   return crypto
@@ -101,6 +121,7 @@ const hash = (code:string):string => {
     .update(code)
     .digest('hex');
 };
+
 
 export class Rasterizer extends Service {
   locals:ServiceConfig;
@@ -160,51 +181,70 @@ export class Rasterizer extends Service {
     });
   }
 
-  // 6b3c25d7d8918eeda3230357a58ecf5ea20bf5f3
-  rasterizeCode(code: string):Promise<Meta> {
-    this.logger('create internal page');
-    let payload = this.getPayload(code);
-    let lines = code.split(/\r\n|\r|\n/).length;
-    let size = { width: 435, height: lines * 20 };
-    let filePath = 'data/' + hash(code) + '.png';
-
+  createPage(data:Data):Promise {
     return new Promise((resolve, reject) => {
       this.service.createPage((page, createError) => {
         if (createError) {
           reject(createError);
         } else {
-          try {
-            page.set('viewportSize', size);
-            this.logger('address', this.locals.address);
-            this.logger('payload:\n', toJSON(payload));
-            page.open(this.locals.address, payload, (status) => {
-              this.logger('open status:', status);
-              if (status === 'success') {
-                page.render(filePath, () => {
-                  toFile(filePath).then(file => {
-                    this.logger('file created:\n', toJSON(file));
-                    fs.writeFile(filePath + '.meta.json',
-                      toJSON(createMeta({code, file})),
-                      (metaError) => {
-                        if (metaError) {
-                          reject(metaError);
-                        } else {
-                          resolve(createMeta({code, file}));
-                        }
-                      });
-                  }).catch(err => reject(err));
-                });
-              } else {
-                this.logger('address', this.locals.address);
-                this.logger(toJSON(payload));
-                reject(new Error('page open failed'));
-              }
-            });
-          } catch (pageOpenError) {
-            reject(pageOpenError);
-          }
+          page.set('viewportSize', data.dimensions);
+          this.logger('address', this.locals.address);
+          this.logger('payload:\n', toJSON(data.payload));
+          data.page = page;
+          resolve(data);
         }
       });
+    });
+  }
+  open(data:Data):Promise<Data> {
+    return new Promise((resolve, reject)=> {
+      data.page.open(this.locals.address, data.payload, (status) => {
+        this.logger('open status:', status);
+        if (status === 'success') {
+          resolve(data);
+        } else {
+          reject();
+        }
+      });
+    });
+  }
+  render(data:Data):Promise<Data> {
+    return new Promise((resolve, reject) => {
+      try {
+        data.page.render(data.filePath, () => {
+          resolve(data);
+        });
+      } catch (e) {
+        reject(e);
+      }
+    });
+  }
+
+  rasterizeCode(code: string):Promise<Object> {
+    this.logger('create internal page');
+    let lines = code.split(/\r\n|\r|\n/).length;
+    let data = {
+      code,
+      lines,
+      page: {},
+      payload: this.getPayload(code),
+      dimensions: { width: 435, height: lines * 20 },
+      filePath: 'data/' + hash(code) + '.png'
+    };
+
+    return new Promise((resolve, reject) => {
+      this.createPage(data)
+        .then(this.open)
+        .then(this.render)
+        .then(write)
+        .then(fileData => {
+          resolve({
+            ...fileData,
+            code: data.code,
+            lines: data.lines,
+            dimensions: data.dimensions
+          });
+        }).catch(reject);
     });
   }
 

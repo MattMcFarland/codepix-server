@@ -8,6 +8,8 @@ const OK = (obj) => {
 };
 
 
+
+
 describe('Model and instance methods.', () => {
 
   let Card;

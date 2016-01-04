@@ -17,6 +17,9 @@ export class Service extends Base {
       'handleStdReq',
       'spawnPhantom',
       'getPayload',
+      'open',
+      'render',
+      'createPage',
       'rasterizeCode',
       'startService',
       'killService'

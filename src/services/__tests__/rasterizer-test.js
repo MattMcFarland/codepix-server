@@ -6,8 +6,7 @@ import {
   request,
   bodyParser,
   path,
-  winston,
-  compression
+  winston
 } from '../modules';
 
 /** Test Modules **/
@@ -73,7 +72,6 @@ describe('=> Server', function () {
     app.set('views', path.join(__dirname, '../../../views'));
     app.set('view engine', 'hbs');
 
-    app.use(compression({level: 9}));
     app.use(bodyParser.urlencoded({ extended: true }));
     app.use(bodyParser.json());
 
@@ -148,14 +146,17 @@ describe('=> Server', function () {
       before(function (done) {
         rasterizer
           .rasterizeCode('console.log("test")')
-          .then(f => {
-            file = f;
+          .then(payload => {
+            file = payload;
+            console.log('\n\n', payload, '\n\n');
             done();
           }).catch(err => done(err));
       });
 
-      it('filename and id sha1 hash is exact match of code', function () {
-        expect(file.id).to.equal('6b3c25d7d8918eeda3230357a58ecf5ea20bf5f3');
+      it('shasum verification', function () {
+        expect(file.shasum).to.equal(
+          '6b3c25d7d8918eeda3230357a58ecf5ea20bf5f3'
+        );
       });
 
 

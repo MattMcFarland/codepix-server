@@ -85,12 +85,12 @@ var needsCheck;
 var toCheck = {};
 var timeout;
 
-function logTask (str) {
+function logTask(str) {
   console.log('\n', yellow('=========='), str, '\n');
 }
 
 function startWatch() {
-  figlet('Fresh', function(err, data) {
+  figlet('Fresh', function (err, data) {
     if (err) {
       console.log('Something went wrong...');
       console.dir(err);
@@ -174,7 +174,7 @@ function runTests(filepaths) {
   logTask('Running Tests');
 
   return exec('mocha', [
-    '--reporter', 'spec',
+    '--reporter', 'nyan',
     '--require', 'tasks/mocha-bootload'
   ].concat(
     allTests(filepaths) ? filepaths.map(srcPath) : ['src/**/__tests__/**/*.js']

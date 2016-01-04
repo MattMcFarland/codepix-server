@@ -13,17 +13,6 @@ TODOS:
 
 current database vars:
 
-shasum
-url
-size
-
-          title: this.state.titleValue,
-          description: this.state.descriptionValue,
-          language: this.state.codeLang,
-          visibility: this.state.visibility,
-          code: this.state.textAreaValue
-
-
 - [ ] show the language being used at the
       top of each post (like near the time)
 
