@@ -12,7 +12,7 @@
     "lint": "eslint src",
     "check": "flow check",
     "build": "rm -rf lib/* && babel src --ignore __tests__ --out-dir lib && npm run copy",
-    "copy": "cp -R views lib/views && cp -R src/db/config lib/db/config",
+    "copy": "cp -R views lib/views && cp -R src/database/config lib/database/config",
     "iron-watch": "iron-node tasks/iron-watch.js",
     "watch": "babel tasks/watch.js | node",
     "cover": "babel-node node_modules/.bin/isparta cover --root src --report html node_modules/.bin/_mocha -- $npm_package_options_mocha",

@@ -3,13 +3,11 @@ import {
   hljs,
   Chance,
   fs,
-  path,
-  crypto
+  path
 
 } from './modules';
 
-import { onAuthenticate } from '../auth/cedepixAuth';
-import { User } from '../database';
+import { onAuthenticate, signUp } from '../auth/cedepixAuth';
 
 let apiRoute = express.Router();
 
@@ -85,7 +83,6 @@ apiRoute.post('/', function (req, res, next) {
 
 });
 
-
 apiRoute.post('/login', onAuthenticate(), (req, res, next) => {
   next();
 });
@@ -95,30 +92,8 @@ apiRoute.post('/logout', (req, res) => {
   res.json({logout: true});
 });
 
-const hash = (pwd) => {
-  return crypto
-    .createHash('sha1')
-    .update(pwd)
-    .digest('hex');
-};
-
-apiRoute.post('/signup', (req, res, next) => {
-  if (req.user) {
-    res.status(400);
-    res.json({msg: 'already logged in'});
-  } else {
-    var pass = hash(req.body.password);
-    User.create({
-      username: req.body.username,
-      password: pass
-    }).then(() => {
-      res.status(200);
-      res.json({msg: 'success'});
-    }).catch(next);
-  }
+apiRoute.post('/signup', signUp(), (req, res, next) => {
+  next();
 });
 
-
-
 export const api = apiRoute;
-

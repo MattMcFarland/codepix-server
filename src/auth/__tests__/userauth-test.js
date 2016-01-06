@@ -132,11 +132,20 @@ describe('models/User.js => database', () => {
       it('can signup', (done) => {
         request(app)
           .post('/api/signup')
-          .send({username: 'someuser', password: 'password'})
+          .send({
+            username: 'someuser',
+            email: 'hubhub@hub.com',
+            password: 'password'})
           .expect(200)
           .end((err, res) => {
+            console.log(res.body);
             expect(err).to.equal(null);
-            expect(res.body.msg).to.equal('success');
+            OK(res);
+            OK(res.body);
+            expect(res.body.user.username).to.equal('someuser');
+            expect(res.body.user.email).to.equal('hubhub@hub.com');
+            expect(res.body.user.password)
+              .to.equal('5baa61e4c9b93f3f0682250b6cf8331b7ee68fd8');
 
             User.findAll({
               where: {

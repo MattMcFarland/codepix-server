@@ -71,3 +71,44 @@ export function onAuthenticate() {
   };
 }
 
+
+function createUser({username, password, email}) {
+  return new Promise((resolve, reject) => {
+    User.create({
+      username,
+      password: hash(password),
+      email: email
+    }).then((user) => resolve(user)).catch(err => reject(err));
+  });
+}
+
+
+export function signUp() {
+  return function (req, res, next) {
+    let count = User.count();
+    if (typeof count === 'number' && count > 0) {
+      console.log(User.count());
+      User.findOne(
+        { where: { username: req.body.username } }
+      ).then(taken => {
+        if (taken) {
+          res.status(401);
+          return res.json({message: 'username already exists'});
+        }
+        console.log('\n', req.body.username, 'is available! \n');
+        console.log('creating user');
+        createUser(req.body).then(user => {
+          res.json({user, message: 'success'});
+        }).catch(bad => next(bad));
+      }).catch(err => next(err));
+    } else {
+      console.log('creating our FIRST USER!!! OMG');
+      createUser(req.body)
+        .then(user => res.json({user, message: 'success'}))
+        .catch(err => next(err));
+    }
+  };
+}
+
+
+
