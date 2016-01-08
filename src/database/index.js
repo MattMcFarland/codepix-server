@@ -1,5 +1,6 @@
 const models = require('./models');
 
+export const db = models.sequelize;
 export const Card = models.Card;
 export const Comment = models.Comment;
 export const Flag = models.Flag;

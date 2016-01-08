@@ -7,9 +7,10 @@ import {
 
 } from './modules';
 
-import { onAuthenticate, signUp } from '../auth/cedepixAuth';
+import { onAuthenticate, signUp } from '../auth';
 
 let apiRoute = express.Router();
+
 
 apiRoute.get('/code/:id', (req, res) => {
   let data = require('../../data/' + req.params.id + '.png.meta.json');
@@ -41,6 +42,9 @@ apiRoute.get('/list', (req, res, next) => {
 
 
 });
+
+
+
 
 apiRoute.post('/add', function (req, res, next) {
   if (req.rasterizer) {

@@ -1,6 +1,5 @@
-
 /**
- * Import Node Modules
+ * Import Node Modules |||||||||||||||||||||||||||||||||||||||||||||||||||||||
  */
 import {
   express,
@@ -9,88 +8,155 @@ import {
   cookieParser,
   bodyParser,
   compression,
-  expressPhantom
+  expressPhantom,
+  passport,
+  session,
+  SequelizeStore
 } from './modules';
 
 /**
- * Import Routes
+ * Import Routes  ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
  */
 import {
   api,
   root
 } from './routes';
 
+/**
+ * Import Sequelize database   ||||||||||||||||||||||||||||||||||||||||||||||
+ */
+import {
+  db
+} from './database';
 
-// app setup
+// ===========================================================================
+//                 _            _
+//    ___ ___   __| | ___ _ __ (_)_  __
+//   / __/ _ \ / _` |/ _ \ '_ \| \ \/ /
+//  | (_| (_) | (_| |  __/ |_) | |>  <
+//   \___\___/ \__,_|\___| .__/|_/_/\_\
+//                       |_|                                        app.js
+// ============================================================================
+
+// Globals
 const app = express();
 const staticpath = path.join(
   __dirname, '../node_modules/codepix-client/lib/public'
 );
-// view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'hbs');
+const store = new SequelizeStore({database: db});
 
-app.use(compression({level: 9, filter: shouldCompress}));
-app.use(expressPhantom.SEORender);
+/*  App Setup  ----------------------------------------------------------- */
+{
 
-function shouldCompress(req, res) {
-  if (req.headers['x-no-compression']) {
-    // don't compress responses with this request header
-    console.log('no compression');
-    return false;
-  }
-  // fallback to standard filter function
-  return compression.filter(req, res);
+  // view engine setup
+  app.set('views', path.join(__dirname, 'views'));
+  app.set('view engine', 'hbs');
+
+  // compression setup
+  const shouldCompress = (req, res) => {
+    if (req.headers['x-no-compression']) {
+      // don't compress responses with this request header
+      console.log('no compression');
+      return false;
+    }
+    // fallback to standard filter function
+    return compression.filter(req, res);
+  };
+  app.use(compression({level: 9, filter: shouldCompress}));
+
+  // Using express-phantom to render javascript for search engines.
+  app.use(expressPhantom.SEORender);
+
+  // Assuming it better to load favicon early on...
+  app.use(favicon(path.join(staticpath, 'favicon.ico')));
 }
 
-app.use(favicon(path.join(staticpath, 'favicon.ico')));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(cookieParser());
-app.use(express.static(staticpath));
+/*  Server I/O  ---------------------------------------------------------- */
+{
+
+  // i/o middlewares
+  app.use(cookieParser());
+  app.use(bodyParser.json());
+  app.use(bodyParser.urlencoded({extended: false}));
+  app.use(session({
+    secret: 'K7@*{GwHdq1@+ChhB%|M|r$1JkW|15ip^Kwguq#^ETD',
+    name: '_codepix',
+    resave: false,
+    saveUninitialized: false,
+    store
+  }));
+
+  app.use(passport.initialize());
+  app.use(passport.session());
+}
+
+/* Router setup */
+{
+  app.use((req, res, next) => {
+    var status = req.isAuthenticated() ? 'logged in' : 'logged out';
+    console.log(
+      'status:', status, '\n',
+      req.sessionStore,
+      req.sessionID,
+      req.session
+    );
+    next();
+  });
+
+  // Static paths
+  app.use(express.static(staticpath));
+  app.use('/c0dez/data', express.static('data'));
+
+  // api endpoint
+  app.use('/api', (req, res, next) => {
+    if (app.get('rasterizer')) {
+      req.rasterizer = app.get('rasterizer');
+    }
+    next();
+  });
+  app.use('/api', api);
+
+  // root endpoint
+  app.use('/', root);
+
+}
+
+/* Error handlers */
+{
+  // Not to be confused with exception handling, these errors are for
+  // outputting a response for caught exceptions only.
+
+  // catch 404 and forward to error handler
+  app.use(function (req, res, next) {
+    var err = new Error('Not Found');
+    err.status = 404;
+    next(err);
+  });
 
 
-
-app.use('/c0dez/data', express.static('data'));
-app.use('/api', function (req, res, next) {
-  if (app.get('rasterizer')) {
-    req.rasterizer = app.get('rasterizer');
+  // development error handler
+  // will print stacktrace
+  if (app.get('env') === 'development') {
+    app.use(function (err, req, res) {
+      res.status(err.status || 500);
+      res.render('error', {
+        message: err.message,
+        error: err
+      });
+    });
   }
-  next();
-});
-app.use('/api', api);
-app.use('/', root);
-// catch 404 and forward to error handler
-app.use(function (req, res, next) {
-  var err = new Error('Not Found');
-  err.status = 404;
-  next(err);
-});
 
-// error handlers
 
-// development error handler
-// will print stacktrace
-if (app.get('env') === 'development') {
+  // production error handler
+  // no stack-traces leaked to user
   app.use(function (err, req, res) {
     res.status(err.status || 500);
     res.render('error', {
       message: err.message,
-      error: err
+      error: {}
     });
   });
+
 }
-
-
-// production error handler
-// no stack-traces leaked to user
-app.use(function (err, req, res) {
-  res.status(err.status || 500);
-  res.render('error', {
-    message: err.message,
-    error: {}
-  });
-});
-
 
 module.exports = app;
