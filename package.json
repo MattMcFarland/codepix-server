@@ -80,6 +80,7 @@
     "sequelize": "^3.15.1",
     "sequelize-cli": "^2.2.1",
     "sequelstore-connect": "^1.1.1",
+    "session-passport-info": "^0.0.3",
     "serve-favicon": "~2.3.0",
     "supertest": "^1.1.0",
     "winston": "^2.1.1"

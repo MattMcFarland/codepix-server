@@ -1,0 +1,13 @@
+language: node_js
+
+node_js:
+  - "5.3"
+
+notifications:
+  email: false
+
+script:
+  - npm run lint && npm run check && npm run cover:lcov
+
+after_success:
+  - cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js

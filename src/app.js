@@ -11,7 +11,8 @@ import {
   expressPhantom,
   passport,
   session,
-  SequelizeStore
+  SequelizeStore,
+  sessionInfo
 } from './modules';
 
 /**
@@ -92,16 +93,8 @@ const store = new SequelizeStore({database: db});
 
 /* Router setup */
 {
-  app.use((req, res, next) => {
-    var status = req.isAuthenticated() ? 'logged in' : 'logged out';
-    console.log(
-      'status:', status, '\n',
-      req.sessionStore,
-      req.sessionID,
-      req.session
-    );
-    next();
-  });
+
+  app.use(sessionInfo());
 
   // Static paths
   app.use(express.static(staticpath));
