@@ -90,6 +90,7 @@ const createMeta = ({
     shasum: file.id,
     code: code,
     filename: file.id + '.png',
+    
     size: file.stats.size,
     detectedLanguage: hljs.highlightAuto(code).language
   };
