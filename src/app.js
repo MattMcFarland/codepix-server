@@ -11,8 +11,9 @@ import {
   expressPhantom,
   passport,
   session,
-  SequelizeStore,
-  sessionInfo
+  FileStore,
+  schema,
+  graph
 } from './modules';
 
 /**
@@ -23,12 +24,6 @@ import {
   root
 } from './routes';
 
-/**
- * Import Sequelize database   |||||||||||||||||||||||||||||||||||||||||||||||
- */
-import {
-  db
-} from './database';
 
 // ===========================================================================
 //                 _            _
@@ -44,7 +39,7 @@ const app = express();
 const staticpath = path.join(
   __dirname, '../node_modules/codepix-client/lib/public'
 );
-const store = new SequelizeStore({database: db});
+const store = new FileStore();
 
 /*  App Setup  ----------------------------------------------------------- */
 {
@@ -82,8 +77,9 @@ const store = new SequelizeStore({database: db});
   app.use(session({
     secret: 'K7@*{GwHdq1@+ChhB%|M|r$1JkW|15ip^Kwguq#^ETD',
     name: '_codepix',
-    resave: false,
-    saveUninitialized: false
+    resave: true,
+    saveUninitialized: true,
+    store
   }));
 
   app.use(passport.initialize());
@@ -93,7 +89,14 @@ const store = new SequelizeStore({database: db});
 /* Router setup  --------------------------------------------------------- */
 {
 
-  app.use(sessionInfo());
+  // app.use(sessionInfo());
+
+  app.use('/graphql', graph(req => ({
+    schema,
+    rootValue: { currentUser: req.user },
+    pretty: true,
+    graphiql: true
+  })));
 
   // Static paths
   app.use(express.static(staticpath));

@@ -17,6 +17,7 @@ module.exports = function (sequelize, DataTypes) {
       size: DataTypes.INTEGER,
       width: DataTypes.INTEGER,
       height: DataTypes.INTEGER,
+      visibility: DataTypes.STRING,
       score: {
         type: new DataTypes.VIRTUAL(DataTypes.INTEGER),
         get() {

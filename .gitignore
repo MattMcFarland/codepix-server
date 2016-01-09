@@ -457,3 +457,5 @@ rasterizer-test.log
 *-test.log
 data/*.png
 data/*.json
+sessions
+*.sqlite

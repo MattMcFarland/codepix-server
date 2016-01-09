@@ -1,16 +1,17 @@
 {
   "development": {
-    "username": "codepix",
-    "password": null,
-    "database": "codepix",
-    "host": "localhost",
-    "dialect": "postgres"
+    "dialect": "sqlite",
+    "storage": "./db.development.sqlite",
+    "logging": false
+  },
+  "test": {
+    "dialect": "sqlite",
+    "storage": "./db.test.sqlite",
+    "logging": false
   },
   "production": {
-    "username": "codepix",
-    "password": null,
-    "database": "codepix",
-    "host": "localhost",
-    "dialect": "postgres"
+    "dialect": "sqlite",
+    "storage": "/var/db/codepix.sqlite",
+    "logging": false
   }
 }
