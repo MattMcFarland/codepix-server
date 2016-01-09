@@ -17,7 +17,12 @@ apiRoute.get('/code/:id', (req, res) => {
   Card.findOne({
     where: { shasum: req.params.id }
   }).then(card => {
-    res.json(card);
+    if (!card) {
+      let data = require('../../data/' + req.params.id + '.png.meta.json');
+      res.json(data);
+    } else {
+      res.json(card);
+    }
   }).catch(() => {
     let data = require('../../data/' + req.params.id + '.png.meta.json');
     res.json(data);
