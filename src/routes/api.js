@@ -7,7 +7,7 @@ import {
 
 } from './modules';
 
-import { onAuthenticate, signUp } from '../auth';
+import { login, signUp } from '../auth';
 
 let apiRoute = express.Router();
 
@@ -87,7 +87,7 @@ apiRoute.post('/', function (req, res, next) {
 
 });
 
-apiRoute.post('/login', onAuthenticate(), (req, res, next) => {
+apiRoute.post('/login', login(), (req, res, next) => {
   next();
 });
 

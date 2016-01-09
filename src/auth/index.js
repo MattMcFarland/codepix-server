@@ -2,5 +2,6 @@ export {
   getUser,
   isAuthenticated,
   onAuthenticate,
-  signUp
+  signUp,
+  login
 } from './passport';

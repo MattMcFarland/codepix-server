@@ -81,6 +81,29 @@ export function onAuthenticate() {
 }
 
 
+export function login() {
+  return function (req, res, next) {
+    passport.authenticate('local', function (err, user, info) {
+      console.log(err, info);
+      if (err) {
+        return next(err);
+      }
+      if (!user) {
+        res.status(401);
+        res.json(info);
+        return next();
+      }
+      req.logIn(user, function (loginErr) {
+        if (loginErr) {
+          return next(loginErr);
+        }
+        res.json({user, message: 'success'});
+      });
+    })(req, res, next);
+  };
+}
+
+
 function createUser({username, password, email}) {
   return new Promise((resolve, reject) => {
     User.create({

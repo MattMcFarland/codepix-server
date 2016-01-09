@@ -24,7 +24,7 @@ import {
 } from './routes';
 
 /**
- * Import Sequelize database   ||||||||||||||||||||||||||||||||||||||||||||||
+ * Import Sequelize database   |||||||||||||||||||||||||||||||||||||||||||||||
  */
 import {
   db
@@ -83,15 +83,14 @@ const store = new SequelizeStore({database: db});
     secret: 'K7@*{GwHdq1@+ChhB%|M|r$1JkW|15ip^Kwguq#^ETD',
     name: '_codepix',
     resave: false,
-    saveUninitialized: false,
-    store
+    saveUninitialized: false
   }));
 
   app.use(passport.initialize());
   app.use(passport.session());
 }
 
-/* Router setup */
+/* Router setup  --------------------------------------------------------- */
 {
 
   app.use(sessionInfo());

@@ -3,7 +3,6 @@ import {
 } from './modules';
 
 const rootRoute = express.Router();
-const {stringify} = JSON;
 
 /* GET home page. */
 rootRoute.get('/code/*', function (req, res) {
@@ -16,7 +15,7 @@ rootRoute.get('/code/*', function (req, res) {
     title: 'codepix.io',
     image_url,
     url,
-    user: stringify(req.user)
+    user: req.user ? JSON.stringify(req.user) : ''
   });
 
 });
@@ -25,7 +24,7 @@ rootRoute.get('*', function (req, res) {
   res.render('root', {
     title: 'codepix.io',
     url: req.url,
-    user: stringify(req.user)
+    user: req.user ? JSON.stringify(req.user) : ''
   });
 });
 
