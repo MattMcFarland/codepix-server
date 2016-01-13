@@ -514,7 +514,9 @@ var CodePixAPI = new GraphQLObjectType({
       type: cardConnection,
       args: connectionArgs,
       resolve: (root, args) =>
-        connectionFromPromisedArray(resolveModelsByClass(Card), args)
+        connectionFromPromisedArray(resolveArrayData(
+          Card.findAll({ order: '"createdAt" DESC'})
+        ), args)
     },
     node: nodeField
   })
