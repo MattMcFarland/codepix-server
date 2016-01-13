@@ -5,7 +5,7 @@
 import app from '../app';
 import { Rasterizer } from '../services/Rasterizer';
 import { http } from './modules';
-
+import { db } from '../database';
 
 // pretty errors for the win
 require('pretty-error').start();
@@ -26,17 +26,23 @@ const server = http.createServer(app);
 /**
  * Listen on provided port, on all network interfaces.
  */
-
-new Rasterizer({
-  host: 'localhost',
-  port: port,
-  debug: true
-}).startService().then(r => {
-  app.set('rasterizer', r);
-  server.on('error', onError);
-  server.on('listening', onListening);
-  server.listen(port);
+console.time('connect to db');
+db.sync().then( () => {
+  console.timeEnd('connect to db');
+  console.time('Rasterizer.startService()');
+  new Rasterizer({
+    host: 'localhost',
+    port: port,
+    debug: true
+  }).startService().then(r => {
+    console.timeEnd('Rasterizer.startService()');
+    app.set('rasterizer', r);
+    server.on('error', onError);
+    server.on('listening', onListening);
+    server.listen(port);
+  });
 });
+
 
 
 

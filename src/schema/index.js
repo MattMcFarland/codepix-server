@@ -165,7 +165,7 @@ var cardType = new GraphQLObjectType({
     },
     author: {
       type: userType,
-      resolve: card => card.getAuthor()
+      resolve: card => card.author
     },
     editor: {
       type: userType,
